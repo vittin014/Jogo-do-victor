@@ -2,7 +2,8 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Victor RPG - Fase 3</title>
+<title>Victor RPG - Evolução Pessoal</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body {
     font-family: 'Arial', sans-serif;
@@ -11,24 +12,11 @@ body {
     margin: 0;
     padding: 20px;
 }
-
 header {
     text-align: center;
     margin-bottom: 20px;
 }
-
-h1 {
-    color: #d39aff;
-    margin-bottom: 10px;
-}
-
-#avatar {
-    width: 100px;
-    height: 100px;
-    margin-bottom: 10px;
-    transition: transform 0.3s;
-}
-
+h1 { color: #d39aff; margin-bottom: 10px; }
 #xpBarContainer {
     width: 100%;
     background-color: #4b0082;
@@ -36,166 +24,161 @@ h1 {
     overflow: hidden;
     height: 25px;
     margin: 10px 0 20px 0;
-    position: relative;
 }
-
 #xpBar {
     width: 0%;
     height: 100%;
     background: linear-gradient(to right, #a64ca6, #d39aff);
     transition: width 0.8s;
 }
-
-#missoes {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.missao-card {
-    background-color: #3d0073;
-    border-radius: 10px;
-    padding: 15px;
-    cursor: pointer;
-    transition: transform 0.2s, background-color 0.2s;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-    position: relative;
-}
-
-.missao-card:hover {
-    transform: scale(1.03);
-    background-color: #4b0082;
-}
-
-.missao-card.completed {
-    background-color: #6a1b9a;
-    text-decoration: line-through;
-}
-
 .section-title {
     font-size: 1.3em;
     margin-bottom: 10px;
     color: #d39aff;
 }
-
-#habilidades {
-    margin-top: 30px;
+.card {
+    background-color: #3d0073;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
 }
-
-ul {
-    list-style: none;
-    padding: 0;
-}
-
-li {
-    padding: 5px 0;
-}
-
-/* Partículas de brilho */
-.particle {
-    position: absolute;
-    width: 6px;
-    height: 6px;
-    background: #fff;
-    border-radius: 50%;
-    pointer-events: none;
-    animation: fly 0.8s forwards;
-}
-
-@keyframes fly {
-    0% { transform: translate(0,0); opacity: 1; }
-    100% { transform: translate(0,-40px) scale(0.3); opacity: 0; }
-}
+.card:hover { transform: scale(1.03); background-color: #4b0082; }
+.card.completed { background-color: #6a1b9a; text-decoration: line-through; }
+ul { list-style: none; padding: 0; }
+li { padding: 5px 0; }
+button { padding: 10px; margin-top: 10px; border:none; border-radius:5px; background:#a64ca6; color:#fff; cursor:pointer; }
+button:disabled { background:#4b0082; cursor:not-allowed; }
 </style>
 </head>
 <body>
 
 <header>
-    <h1>Victor RPG - Fase 3</h1>
-    <img id="avatar" src="https://i.ibb.co/KwM0v82/avatar.png" alt="Avatar do Victor">
-    <p>XP: <span id="xpAtual">0</span></p>
+    <h1>Victor RPG</h1>
+    <p>Fase Atual: <span id="faseAtual">1</span></p>
+    <p>XP Total: <span id="xpAtual">0</span></p>
     <div id="xpBarContainer">
         <div id="xpBar"></div>
     </div>
 </header>
 
-<section id="missoes">
-    <div class="section-title">Missões</div>
-    <div class="missoes-container">
-        <div class="missao-card" data-xp="15" id="missao1">Explicar algum conceito para si mesmo com postura de autoridade e voz confiante</div>
-        <div class="missao-card" data-xp="10" id="missao2">Praticar falar devagar e pausadamente durante 5 minutos</div>
-        <div class="missao-card" data-xp="20" id="missao3">Fazer análise de pensamento consciente, aplicando multiangularidade</div>
-    </div>
+<section id="dashboard">
+    <div class="section-title">Missões da Fase</div>
+    <div id="missoesContainer"></div>
+
+    <div class="section-title">Habilidades em Progresso</div>
+    <ul id="habilidadesList"></ul>
 </section>
 
-<section id="habilidades">
-    <div class="section-title">Habilidades</div>
-    <ul>
-        <li>Fala Confiante: <span id="falaConfiante">2</span></li>
-        <li>Fala Desacelerada: <span id="falaDesacelerada">1</span></li>
-        <li>Clareza Verbal: <span id="clarezaVerbal">1</span></li>
-        <li>Postura de Confiança: <span id="postura">1</span></li>
-        <li>Linguagem Corporal Consciente: <span id="linguagemCorporal">1</span></li>
-        <li>Pensamento Multiangular: <span id="pensamento">1</span></li>
-        <li>Aplicação Prática: <span id="aplicacao">1</span></li>
-        <li>Gerenciamento de Pensamentos: <span id="gerenciamento">1</span></li>
-    </ul>
+<section id="fasesSec">
+    <div class="section-title">Mapa de Fases</div>
+    <div id="fasesContainer"></div>
 </section>
 
 <script>
-let xpAtual = 0;
-const xpBar = document.getElementById('xpBar');
-const avatar = document.getElementById('avatar');
+// ===== Dados iniciais =====
+const fases = [
+    {id:1, nome:"Fase 1", missoes:[
+        {texto:"Praticar fala confiante", xp:10},
+        {texto:"Falar pausadamente por 5 min", xp:5}
+    ]},
+    {id:2, nome:"Fase 2", missoes:[
+        {texto:"Analisar pensamento multiangular", xp:15},
+        {texto:"Aplicar postura de confiança", xp:10}
+    ]},
+    {id:3, nome:"Fase 3", missoes:[
+        {texto:"Explicar um conceito com voz confiante", xp:20},
+        {texto:"Revisar clareza verbal", xp:10}
+    ]}
+    // Pode adicionar até Fase 50
+];
 
-// Carregar progresso do localStorage
-if(localStorage.getItem('xpAtual')) {
-    xpAtual = parseInt(localStorage.getItem('xpAtual'));
-    document.getElementById('xpAtual').textContent = xpAtual;
-    let xpPercent = Math.min((xpAtual / 500) * 100, 100);
-    xpBar.style.width = xpPercent + '%';
+const habilidades = [
+    {nome:"Fala Confiante", nivel:2},
+    {nome:"Fala Desacelerada", nivel:1},
+    {nome:"Clareza Verbal", nivel:1},
+    {nome:"Postura de Confiança", nivel:1},
+    {nome:"Linguagem Corporal", nivel:1},
+    {nome:"Pensamento Multiangular", nivel:1},
+    {nome:"Aplicação Prática", nivel:1},
+    {nome:"Gerenciamento de Pensamentos", nivel:1}
+];
+
+// ===== Carregar progresso do localStorage =====
+let xpAtual = parseInt(localStorage.getItem('xpAtual')) || 0;
+let faseAtual = parseInt(localStorage.getItem('faseAtual')) || 1;
+document.getElementById('xpAtual').textContent = xpAtual;
+document.getElementById('faseAtual').textContent = faseAtual;
+let xpBar = document.getElementById('xpBar');
+xpBar.style.width = Math.min((xpAtual / 500)*100, 100)+'%';
+
+// ===== Função para atualizar missões =====
+function carregarMissoes(){
+    const container = document.getElementById('missoesContainer');
+    container.innerHTML = "";
+    const fase = fases.find(f=>f.id===faseAtual);
+    fase.missoes.forEach((m, idx)=>{
+        let div = document.createElement('div');
+        div.className='card';
+        div.textContent = m.texto + ` (XP: ${m.xp})`;
+        // Verificar se missão já concluída
+        if(localStorage.getItem(`fase${faseAtual}_missao${idx}`)=='completed'){
+            div.classList.add('completed');
+        }
+        div.addEventListener('click', ()=>{
+            if(!div.classList.contains('completed')){
+                div.classList.add('completed');
+                xpAtual += m.xp;
+                document.getElementById('xpAtual').textContent = xpAtual;
+                xpBar.style.width = Math.min((xpAtual/500)*100,100)+'%';
+                localStorage.setItem(`fase${faseAtual}_missao${idx}`,'completed');
+                localStorage.setItem('xpAtual',xpAtual);
+                alert(`Missão concluída! +${m.xp} XP`);
+            }
+        });
+        container.appendChild(div);
+    });
 }
 
-// Carregar status das missões
-const missaoCards = document.querySelectorAll('.missao-card');
-missaoCards.forEach(card => {
-    const status = localStorage.getItem(card.id);
-    if(status === 'completed') {
-        card.classList.add('completed');
-    }
-
-    card.addEventListener('click', () => {
-        if(!card.classList.contains('completed')) {
-            card.classList.add('completed');
-            let ganhoXP = parseInt(card.dataset.xp);
-            xpAtual += ganhoXP;
-            document.getElementById('xpAtual').textContent = xpAtual;
-
-            // Animação da barra de XP
-            let xpPercent = Math.min((xpAtual / 500) * 100, 100);
-            xpBar.style.width = xpPercent + '%';
-
-            // Salvar progresso
-            localStorage.setItem('xpAtual', xpAtual);
-            localStorage.setItem(card.id, 'completed');
-
-            // Avatar faz animação
-            avatar.style.transform = 'scale(1.2)';
-            setTimeout(()=>{ avatar.style.transform = 'scale(1)'; },300);
-
-            // Partículas de brilho
-            for(let i=0;i<10;i++){
-                let particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = (card.offsetLeft + Math.random()*card.offsetWidth) + 'px';
-                particle.style.top = (card.offsetTop + Math.random()*card.offsetHeight) + 'px';
-                document.body.appendChild(particle);
-                setTimeout(()=>{ particle.remove(); },800);
-            }
-
-            alert(`Missão concluída! Você ganhou ${ganhoXP} XP`);
-        }
+// ===== Função para mostrar habilidades =====
+function carregarHabilidades(){
+    const ul = document.getElementById('habilidadesList');
+    ul.innerHTML = "";
+    habilidades.forEach(h=>{
+        let li = document.createElement('li');
+        li.textContent = `${h.nome}: Nível ${h.nivel}`;
+        ul.appendChild(li);
     });
-});
+}
+
+// ===== Função para mostrar mapa de fases =====
+function carregarFases(){
+    const container = document.getElementById('fasesContainer');
+    container.innerHTML = "";
+    fases.forEach(f=>{
+        let btn = document.createElement('button');
+        btn.textContent = f.nome;
+        if(f.id>faseAtual){
+            btn.disabled=true;
+        }
+        btn.addEventListener('click', ()=>{
+            if(f.id<=faseAtual){
+                localStorage.setItem('faseAtual', f.id);
+                faseAtual = f.id;
+                document.getElementById('faseAtual').textContent = faseAtual;
+                carregarMissoes();
+                carregarFases();
+            }
+        });
+        container.appendChild(btn);
+    });
+}
+
+// ===== Inicialização =====
+carregarMissoes();
+carregarHabilidades();
+carregarFases();
 </script>
 
 </body>

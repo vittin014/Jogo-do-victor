@@ -3,118 +3,155 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Victor’s Quest</title>
+<title>Gamificação da Vida Real</title>
 <style>
-  body { font-family: Arial, sans-serif; background: #121212; color: #f0f0f0; margin:0; padding:0;}
-  header { background: #1f1f1f; padding: 10px; text-align: center; font-size: 1.2em; font-weight: bold;}
-  nav { display: flex; justify-content: space-around; background: #1f1f1f; padding: 10px 0; position: fixed; width: 100%; bottom:0;}
-  nav button { background: #2a2a2a; color:#f0f0f0; border:none; padding:10px 20px; border-radius:5px;}
-  nav button.active { background: #4CAF50; }
-  .container { padding: 20px; margin-bottom: 60px; }
-  .xp-bar { background: #333; border-radius: 10px; overflow: hidden; margin: 10px 0;}
-  .xp-bar-inner { background: #4CAF50; height: 20px; width: 0%; text-align:center; line-height:20px; color:#fff;}
-  .card { background: #1f1f1f; padding: 15px; border-radius: 10px; margin-bottom: 10px; }
-  .card.completed { background: #4CAF50; color: #fff; text-decoration: line-through;}
-  h2 { margin-top:0; }
-  .skills { display: grid; grid-template-columns: 1fr 1fr; gap:10px; }
-  .skill { background: #2a2a2a; padding:10px; border-radius:5px; }
-  .skill-bar { background: #333; border-radius: 10px; overflow: hidden; height: 15px; margin-top:5px; }
-  .skill-bar-inner { background: #FFD700; height: 100%; width:0%; }
+    body { font-family: Arial, sans-serif; background: #1e1e2f; color: #fff; margin:0; padding:0;}
+    header { padding: 20px; text-align:center; background:#28283d;}
+    h1 { margin:0; color:#00f;}
+    .container { padding:20px; max-width:800px; margin:auto;}
+    .fase { margin-bottom:30px; border: 2px solid #444; padding:15px; border-radius:10px; background:#2a2a40;}
+    .fase h2 { margin-top:0;}
+    .missao { margin:5px 0; padding:8px; border-radius:5px; background:#3a3a55; display:flex; justify-content:space-between; }
+    .missao.completed { background:#2f7c2f;}
+    .barra-xp { width:100%; background:#555; border-radius:10px; margin:10px 0; overflow:hidden;}
+    .barra-xp-inner { height:25px; background:#00f; width:0%; transition:width 0.5s;}
+    button { padding:10px 20px; border:none; border-radius:5px; cursor:pointer; margin-top:10px;}
+    button:disabled { background:#888; cursor:not-allowed;}
+    .habilidade { margin:10px 0; }
+    .habilidade-bar { width:100%; background:#555; border-radius:10px; overflow:hidden;}
+    .habilidade-bar-inner { height:20px; background:#0f0; width:0%; transition:width 0.5s;}
 </style>
 </head>
 <body>
+<header>
+    <h1>Gamificação da Vida Real</h1>
+</header>
+<div class="container">
+    <div class="fase">
+        <h2>Fase Atual: Fase 3</h2>
+        <div class="barra-xp">
+            <div id="barraXP" class="barra-xp-inner"></div>
+        </div>
+        <p id="xpStatus">XP: 250 / 350</p>
+        <button id="ganharXP">Ganhar 50 XP</button>
+        <button id="proximaFase">Ir para Fase 4</button>
+        <h3>Missões:</h3>
+        <div id="missoes"></div>
+    </div>
 
-<header>Victor’s Quest ⚡</header>
+    <div class="fase">
+        <h2>Habilidades</h2>
+        <div class="habilidade">
+            <span>Fala Confiante (Nível 3)</span>
+            <div class="habilidade-bar">
+                <div id="falaConfiante" class="habilidade-bar-inner"></div>
+            </div>
+        </div>
+        <div class="habilidade">
+            <span>Postura de Autoridade (Nível 2)</span>
+            <div class="habilidade-bar">
+                <div id="posturaAutoridade" class="habilidade-bar-inner"></div>
+            </div>
+        </div>
+    </div>
 
-<div class="container" id="page-fase-atual">
-  <h2>Fase Atual: Estrategista da Mente (Fase 3)</h2>
-  <p>XP: <span id="xp-current">25</span>/<span id="xp-max">100</span></p>
-  <div class="xp-bar">
-    <div class="xp-bar-inner" id="xp-bar">25%</div>
-  </div>
-  
-  <h3>Missões</h3>
-  <div class="card" onclick="completeMission(this,30)">Explicar algo com voz firme + pausas estratégicas → +30 XP</div>
-  <div class="card" onclick="completeMission(this,40)">Analisar uma situação em 3 ângulos → +40 XP</div>
-  <div class="card" onclick="completeMission(this,30)">Manter postura de comando 10 min → +30 XP</div>
-  
-  <h3>Boss</h3>
-  <div class="card" onclick="completeMission(this,150)">Alguém muda comportamento por sua presença → +150 XP</div>
+    <div class="fase">
+        <h2>Todas as Fases</h2>
+        <ul id="listaFases"></ul>
+    </div>
 </div>
-
-<div class="container" id="page-todas-fases" style="display:none;">
-  <h2>Todas as Fases</h2>
-  <ol>
-    <li>Fase 1 – Guerreiro da Voz ✅</li>
-    <li>Fase 2 – Guardião da Postura ✅</li>
-    <li>Fase 3 – Estrategista da Mente (Em progresso)</li>
-    <li>Fase 4 – Executor (Bloqueado)</li>
-    <li>Fase 5 – Mestre dos Pensamentos (Bloqueado)</li>
-    <li>Fase 6 – … (Bloqueado)</li>
-  </ol>
-</div>
-
-<div class="container" id="page-habilidades" style="display:none;">
-  <h2>Habilidades</h2>
-  <div class="skills">
-    <div class="skill">
-      <strong>Clareza Verbal</strong>
-      <div class="skill-bar"><div class="skill-bar-inner" id="skill-claridade">10%</div></div>
-      Nível 1
-    </div>
-    <div class="skill">
-      <strong>Fala Confiante</strong>
-      <div class="skill-bar"><div class="skill-bar-inner" id="skill-fala">20%</div></div>
-      Nível 2
-    </div>
-    <div class="skill">
-      <strong>Postura de Autoridade</strong>
-      <div class="skill-bar"><div class="skill-bar-inner" id="skill-postura">10%</div></div>
-      Nível 1
-    </div>
-    <div class="skill">
-      <strong>Pensamento Multiangular</strong>
-      <div class="skill-bar"><div class="skill-bar-inner" id="skill-mente">10%</div></div>
-      Nível 1
-    </div>
-  </div>
-</div>
-
-<nav>
-  <button onclick="showPage('page-fase-atual')" class="active">Fase Atual</button>
-  <button onclick="showPage('page-todas-fases')">Todas as Fases</button>
-  <button onclick="showPage('page-habilidades')">Habilidades</button>
-</nav>
 
 <script>
-let xp = 25;
-let xpMax = 100;
+let usuario = {
+    xp: 250,
+    faseAtual: 3,
+    xpNecessario: 350,
+    fases: [
+        {id:1, nome:"Fase 1", missoes:[
+            {nome:"Missão 1.1", completa:true},
+            {nome:"Missão 1.2", completa:true}
+        ]},
+        {id:2, nome:"Fase 2", missoes:[
+            {nome:"Missão 2.1", completa:true},
+            {nome:"Missão 2.2", completa:false}
+        ]},
+        {id:3, nome:"Fase 3", missoes:[
+            {nome:"Missão 3.1", completa:false},
+            {nome:"Missão 3.2", completa:false}
+        ]}
+    ],
+    habilidades:[
+        {nome:"Fala Confiante", nivel:3, progresso:60},
+        {nome:"Postura de Autoridade", nivel:2, progresso:40}
+    ]
+};
 
-function completeMission(card, missionXP){
-  if(card.classList.contains('completed')) return;
-  card.classList.add('completed');
-  xp += missionXP;
-  if(xp >= xpMax){
-    xp -= xpMax;
-    alert('Parabéns! Você liberou a próxima fase!');
-  }
-  document.getElementById('xp-current').innerText = xp;
-  document.getElementById('xp-bar').style.width = (xp/xpMax*100) + '%';
+// Atualiza barra de XP
+function atualizarXP() {
+    let barra = document.getElementById("barraXP");
+    let porcentagem = (usuario.xp / usuario.xpNecessario) * 100;
+    barra.style.width = porcentagem + "%";
+    document.getElementById("xpStatus").innerText = `XP: ${usuario.xp} / ${usuario.xpNecessario}`;
+    document.getElementById("proximaFase").disabled = usuario.xp < usuario.xpNecessario;
 }
 
-// Navegação entre páginas
-function showPage(pageId){
-  document.getElementById('page-fase-atual').style.display = 'none';
-  document.getElementById('page-todas-fases').style.display = 'none';
-  document.getElementById('page-habilidades').style.display = 'none';
-  document.getElementById(pageId).style.display = 'block';
-  
-  // Atualizar botão ativo
-  const buttons = document.querySelectorAll('nav button');
-  buttons.forEach(btn => btn.classList.remove('active'));
-  document.querySelector(`nav button[onclick="showPage('${pageId}')"]`).classList.add('active');
+// Atualiza lista de missões
+function atualizarMissoes() {
+    let container = document.getElementById("missoes");
+    container.innerHTML = "";
+    let fase = usuario.fases.find(f=>f.id === usuario.faseAtual);
+    fase.missoes.forEach(m=>{
+        let div = document.createElement("div");
+        div.className = "missao" + (m.completa ? " completed" : "");
+        div.innerHTML = `<span>${m.nome}</span><span>${m.completa ? "✅" : "❌"}</span>`;
+        container.appendChild(div);
+    });
 }
+
+// Atualiza habilidades
+function atualizarHabilidades() {
+    usuario.habilidades.forEach(h=>{
+        let barra = document.getElementById(h.nome.replace(/\s/g,""));
+        if(barra) barra.style.width = h.progresso + "%";
+    });
+}
+
+// Atualiza lista de todas as fases
+function atualizarListaFases() {
+    let lista = document.getElementById("listaFases");
+    lista.innerHTML = "";
+    usuario.fases.forEach(f=>{
+        let status = f.id < usuario.faseAtual ? "✅ Completa" : (f.id === usuario.faseAtual ? "⏳ Em progresso" : "🔒 Bloqueada");
+        let li = document.createElement("li");
+        li.innerText = `${f.nome} - ${status}`;
+        lista.appendChild(li);
+    });
+}
+
+// Botão ganhar XP
+document.getElementById("ganharXP").addEventListener("click", ()=>{
+    usuario.xp += 50;
+    if(usuario.xp > usuario.xpNecessario) usuario.xp = usuario.xpNecessario;
+    atualizarXP();
+});
+
+// Botão próxima fase
+document.getElementById("proximaFase").addEventListener("click", ()=>{
+    if(usuario.xp >= usuario.xpNecessario){
+        usuario.faseAtual++;
+        usuario.xp = 0;
+        usuario.xpNecessario += 100; // aumenta XP necessário progressivamente
+        atualizarXP();
+        atualizarMissoes();
+        atualizarListaFases();
+    }
+});
+
+// Inicialização
+atualizarXP();
+atualizarMissoes();
+atualizarHabilidades();
+atualizarListaFases();
 </script>
-
 </body>
 </html>

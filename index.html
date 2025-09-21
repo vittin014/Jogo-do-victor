@@ -3,155 +3,244 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gamificação da Vida Real</title>
+<title>Gamificação da Vida Real - Protótipo Completo</title>
 <style>
-    body { font-family: Arial, sans-serif; background: #1e1e2f; color: #fff; margin:0; padding:0;}
-    header { padding: 20px; text-align:center; background:#28283d;}
-    h1 { margin:0; color:#00f;}
-    .container { padding:20px; max-width:800px; margin:auto;}
-    .fase { margin-bottom:30px; border: 2px solid #444; padding:15px; border-radius:10px; background:#2a2a40;}
-    .fase h2 { margin-top:0;}
-    .missao { margin:5px 0; padding:8px; border-radius:5px; background:#3a3a55; display:flex; justify-content:space-between; }
-    .missao.completed { background:#2f7c2f;}
-    .barra-xp { width:100%; background:#555; border-radius:10px; margin:10px 0; overflow:hidden;}
-    .barra-xp-inner { height:25px; background:#00f; width:0%; transition:width 0.5s;}
-    button { padding:10px 20px; border:none; border-radius:5px; cursor:pointer; margin-top:10px;}
-    button:disabled { background:#888; cursor:not-allowed;}
-    .habilidade { margin:10px 0; }
-    .habilidade-bar { width:100%; background:#555; border-radius:10px; overflow:hidden;}
-    .habilidade-bar-inner { height:20px; background:#0f0; width:0%; transition:width 0.5s;}
+body { font-family: Arial, sans-serif; background: #1e1e2f; color: #fff; margin:0; padding:0;}
+header { padding: 20px; text-align:center; background:#28283d;}
+h1 { margin:0; color:#00f;}
+.container { padding:20px; max-width:900px; margin:auto;}
+.fase { margin-bottom:30px; border: 2px solid #444; padding:15px; border-radius:10px; background:#2a2a40;}
+.fase h2 { margin-top:0;}
+.missao { margin:5px 0; padding:8px; border-radius:5px; background:#3a3a55; display:flex; justify-content:space-between; cursor:pointer;}
+.missao.completed { background:#2f7c2f;}
+.barra-xp { width:100%; background:#555; border-radius:10px; margin:10px 0; overflow:hidden;}
+.barra-xp-inner { height:25px; background:#00f; width:0%; transition:width 0.5s;}
+button { padding:10px 20px; border:none; border-radius:5px; cursor:pointer; margin-top:10px;}
+button:disabled { background:#888; cursor:not-allowed;}
+.habilidade { margin:10px 0; }
+.habilidade-bar { width:100%; background:#555; border-radius:10px; overflow:hidden;}
+.habilidade-bar-inner { height:20px; background:#0f0; width:0%; transition:width 0.5s;}
+input { padding:8px; border-radius:5px; border:none; margin-top:5px;}
 </style>
 </head>
 <body>
 <header>
-    <h1>Gamificação da Vida Real</h1>
+    <h1>Gamificação da Vida Real - Protótipo Completo</h1>
 </header>
 <div class="container">
+
     <div class="fase">
-        <h2>Fase Atual: Fase 3</h2>
+        <h2>Fase Atual: <span id="faseAtualNome"></span></h2>
         <div class="barra-xp">
             <div id="barraXP" class="barra-xp-inner"></div>
         </div>
-        <p id="xpStatus">XP: 250 / 350</p>
+        <p id="xpStatus"></p>
         <button id="ganharXP">Ganhar 50 XP</button>
-        <button id="proximaFase">Ir para Fase 4</button>
+        <button id="proximaFase">Ir para a próxima fase</button>
         <h3>Missões:</h3>
         <div id="missoes"></div>
     </div>
 
     <div class="fase">
         <h2>Habilidades</h2>
-        <div class="habilidade">
-            <span>Fala Confiante (Nível 3)</span>
-            <div class="habilidade-bar">
-                <div id="falaConfiante" class="habilidade-bar-inner"></div>
-            </div>
-        </div>
-        <div class="habilidade">
-            <span>Postura de Autoridade (Nível 2)</span>
-            <div class="habilidade-bar">
-                <div id="posturaAutoridade" class="habilidade-bar-inner"></div>
-            </div>
-        </div>
+        <div id="habilidadesContainer"></div>
     </div>
 
     <div class="fase">
         <h2>Todas as Fases</h2>
         <ul id="listaFases"></ul>
     </div>
+
+    <div class="fase" id="faseTesteContainer" style="display:none;">
+        <h2>Fase de Teste</h2>
+        <div id="missoesTeste"></div>
+        <button id="concluirTeste">Concluir Teste</button>
+    </div>
+
+    <div class="fase" id="novaHabilidadeContainer" style="display:none;">
+        <h2>Nova Habilidade</h2>
+        <p>Parabéns! Você concluiu uma habilidade. Qual hábito ou habilidade você quer desenvolver agora?</p>
+        <input type="text" id="novaHabilidadeInput" placeholder="Digite o nome da habilidade">
+        <button id="criarHabilidade">Criar Habilidade</button>
+    </div>
+
 </div>
 
 <script>
+// ===================== Configuração Inicial ===================== //
 let usuario = {
     xp: 250,
     faseAtual: 3,
-    xpNecessario: 350,
-    fases: [
-        {id:1, nome:"Fase 1", missoes:[
-            {nome:"Missão 1.1", completa:true},
-            {nome:"Missão 1.2", completa:true}
-        ]},
-        {id:2, nome:"Fase 2", missoes:[
-            {nome:"Missão 2.1", completa:true},
-            {nome:"Missão 2.2", completa:false}
-        ]},
-        {id:3, nome:"Fase 3", missoes:[
-            {nome:"Missão 3.1", completa:false},
-            {nome:"Missão 3.2", completa:false}
-        ]}
+    habilidades: [
+        {nome:"Fala Confiante", nivel:3, progresso:60, triggers:[3,5,7,9,10], final:false},
+        {nome:"Postura Confiante", nivel:2, progresso:40, triggers:[3,5,7,9,10], final:false},
+        {nome:"Controle Emocional", nivel:1, progresso:10, triggers:[3,5,7,9,10], final:false}
     ],
-    habilidades:[
-        {nome:"Fala Confiante", nivel:3, progresso:60},
-        {nome:"Postura de Autoridade", nivel:2, progresso:40}
-    ]
+    fases: []
 };
 
-// Atualiza barra de XP
-function atualizarXP() {
-    let barra = document.getElementById("barraXP");
-    let porcentagem = (usuario.xp / usuario.xpNecessario) * 100;
-    barra.style.width = porcentagem + "%";
-    document.getElementById("xpStatus").innerText = `XP: ${usuario.xp} / ${usuario.xpNecessario}`;
-    document.getElementById("proximaFase").disabled = usuario.xp < usuario.xpNecessario;
+// ===================== Funções de Persistência ===================== //
+function salvarProgresso() {
+    localStorage.setItem('usuario', JSON.stringify(usuario));
 }
 
-// Atualiza lista de missões
-function atualizarMissoes() {
+function carregarProgresso() {
+    let dados = localStorage.getItem('usuario');
+    if(dados){
+        usuario = JSON.parse(dados);
+    }
+}
+
+// ===================== Gerar Fases e Missões ===================== //
+if(usuario.fases.length === 0){
+    for(let i=1;i<=50;i++){
+        let missoes = [];
+        for(let j=1;j<=2;j++){
+            let dificuldade = i + j;
+            missoes.push({
+                nome:`Missão ${i}.${j}: desafio de complexidade ${dificuldade}`,
+                completa:false,
+                habilidades: usuario.habilidades.map(h=>h.nome)
+            });
+        }
+        usuario.fases.push({id:i, nome:`Fase ${i}`, missoes, xpNecessario: i*100, boss:`Boss da Fase ${i}`});
+    }
+    salvarProgresso();
+}
+
+// ===================== Funções ===================== //
+function atualizarXP(){
+    let barra = document.getElementById("barraXP");
+    let faseObj = usuario.fases.find(f=>f.id===usuario.faseAtual);
+    let porcentagem = (usuario.xp / faseObj.xpNecessario)*100;
+    barra.style.width = porcentagem + "%";
+    document.getElementById("xpStatus").innerText = `XP: ${usuario.xp} / ${faseObj.xpNecessario}`;
+    document.getElementById("proximaFase").disabled = usuario.xp < faseObj.xpNecessario;
+    salvarProgresso();
+}
+
+function atualizarMissoes(){
     let container = document.getElementById("missoes");
     container.innerHTML = "";
-    let fase = usuario.fases.find(f=>f.id === usuario.faseAtual);
-    fase.missoes.forEach(m=>{
+    let fase = usuario.fases.find(f=>f.id===usuario.faseAtual);
+    fase.missoes.forEach((m,index)=>{
         let div = document.createElement("div");
-        div.className = "missao" + (m.completa ? " completed" : "");
-        div.innerHTML = `<span>${m.nome}</span><span>${m.completa ? "✅" : "❌"}</span>`;
+        div.className = "missao" + (m.completa?" completed":"");
+        div.innerHTML = `<span>${m.nome}</span><span>${m.completa?"✅":"❌"}</span>`;
+        div.addEventListener("click", ()=>{
+            m.completa = !m.completa;
+            atualizarMissoes();
+        });
         container.appendChild(div);
     });
 }
 
-// Atualiza habilidades
-function atualizarHabilidades() {
+function atualizarHabilidades(){
+    let container = document.getElementById("habilidadesContainer");
+    container.innerHTML = "";
     usuario.habilidades.forEach(h=>{
-        let barra = document.getElementById(h.nome.replace(/\s/g,""));
-        if(barra) barra.style.width = h.progresso + "%";
+        let divH = document.createElement("div");
+        divH.className = "habilidade";
+        divH.innerHTML = `
+            <span>${h.nome} (Nível ${h.nivel}${h.final?" - Dominada!":""})</span>
+            <div class="habilidade-bar">
+                <div class="habilidade-bar-inner" style="width:${h.progresso}%"></div>
+            </div>
+        `;
+        container.appendChild(divH);
     });
 }
 
-// Atualiza lista de todas as fases
-function atualizarListaFases() {
+function atualizarListaFases(){
     let lista = document.getElementById("listaFases");
     lista.innerHTML = "";
     usuario.fases.forEach(f=>{
-        let status = f.id < usuario.faseAtual ? "✅ Completa" : (f.id === usuario.faseAtual ? "⏳ Em progresso" : "🔒 Bloqueada");
+        let status = f.id < usuario.faseAtual ? "✅ Completa" : (f.id===usuario.faseAtual ? "⏳ Em progresso" : "🔒 Bloqueada");
         let li = document.createElement("li");
         li.innerText = `${f.nome} - ${status}`;
+        li.addEventListener("click", ()=>{
+            usuario.faseAtual = f.id;
+            usuario.xp = Math.min(usuario.xp, f.xpNecessario);
+            atualizarXP();
+            atualizarMissoes();
+            atualizarListaFases();
+        });
         lista.appendChild(li);
     });
 }
 
-// Botão ganhar XP
-document.getElementById("ganharXP").addEventListener("click", ()=>{
-    usuario.xp += 50;
-    if(usuario.xp > usuario.xpNecessario) usuario.xp = usuario.xpNecessario;
-    atualizarXP();
+// ===================== Fase de Teste ===================== //
+function verificarFaseTeste(){
+    let habilidadeTeste = usuario.habilidades.find(h=>h.triggers.includes(h.nivel) && !h.final);
+    if(habilidadeTeste){
+        mostrarFaseTeste(habilidadeTeste);
+    }
+}
+
+function mostrarFaseTeste(habilidade){
+    document.getElementById("faseTesteContainer").style.display="block";
+    let container = document.getElementById("missoesTeste");
+    container.innerHTML="";
+    container.innerHTML+=`<p>Missão de Teste para ${habilidade.nome}: Execute a habilidade em situação prática e responda às perguntas.</p>`;
+}
+
+// Concluir teste
+document.getElementById("concluirTeste").addEventListener("click", ()=>{
+    let habilidade = usuario.habilidades.find(h=>h.triggers.includes(h.nivel) && !h.final);
+    habilidade.nivel++;
+    habilidade.progresso=0;
+    if(habilidade.nivel>=10){
+        habilidade.final=true;
+        habilidade.nivel=10;
+        document.getElementById("novaHabilidadeContainer").style.display="block";
+    }
+    document.getElementById("faseTesteContainer").style.display="none";
+    atualizarHabilidades();
+    salvarProgresso();
 });
 
-// Botão próxima fase
-document.getElementById("proximaFase").addEventListener("click", ()=>{
-    if(usuario.xp >= usuario.xpNecessario){
-        usuario.faseAtual++;
-        usuario.xp = 0;
-        usuario.xpNecessario += 100; // aumenta XP necessário progressivamente
-        atualizarXP();
-        atualizarMissoes();
-        atualizarListaFases();
+// Criar nova habilidade
+document.getElementById("criarHabilidade").addEventListener("click", ()=>{
+    let nome = document.getElementById("novaHabilidadeInput").value.trim();
+    if(nome){
+        usuario.habilidades.push({nome:nome, nivel:1, progresso:0, triggers:[3,5,7,9,10], final:false});
+        document.getElementById("novaHabilidadeContainer").style.display="none";
+        document.getElementById("novaHabilidadeInput").value="";
+        atualizarHabilidades();
+        salvarProgresso();
+        alert(`Nova habilidade "${nome}" adicionada!`);
     }
 });
 
-// Inicialização
+// ===================== Eventos ===================== //
+document.getElementById("ganharXP").addEventListener("click", ()=>{
+    usuario.xp += 50;
+    let faseObj = usuario.fases.find(f=>f.id===usuario.faseAtual);
+    if(usuario.xp>faseObj.xpNecessario) usuario.xp=faseObj.xpNecessario;
+    atualizarXP();
+    verificarFaseTeste();
+});
+
+document.getElementById("proximaFase").addEventListener("click", ()=>{
+    let faseObj = usuario.fases.find(f=>f.id===usuario.faseAtual);
+    if(usuario.xp>=faseObj.xpNecessario && usuario.faseAtual<usuario.fases.length){
+        usuario.faseAtual++;
+        usuario.xp = 0;
+        atualizarXP();
+        atualizarMissoes();
+        atualizarListaFases();
+        verificarFaseTeste();
+    }
+});
+
+// ===================== Inicialização ===================== //
+carregarProgresso();
+document.getElementById("faseAtualNome").innerText = usuario.fases.find(f=>f.id===usuario.faseAtual).nome;
 atualizarXP();
 atualizarMissoes();
 atualizarHabilidades();
 atualizarListaFases();
+verificarFaseTeste();
 </script>
 </body>
 </html>
